@@ -1,4 +1,5 @@
 <?php
+// Hay que ejecutar 'composer require pusher/pusher-php-server'
 require __DIR__ . '/vendor/autoload.php';
 
 $pusher = new Pusher\Pusher(
