@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://js.pusher.com/8.3.0/pusher.min.js"></script>
+
+    <title>Gráfica videojuegos</title>
+
+    <style>
+        body {
+            margin: 0;
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        #actualizar {
+            background-color: #114bbf;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #actualizar:hover {
+            background-color: darkblue;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+    </style>
+</head>
+<body>
+<!-- Botón para actualizar el gráfico -->
+
+<button id="actualizar">Actualizar Gráfico</button>
+
+<!-- Gráfico -->
+<canvas id="myChart" width="600" height="600"></canvas>
+
+
+<script>
+    const ctx = document.getElementById('myChart').getContext('2d');
+
+    const data = {
+        labels: ['Shooter', 'Acción/Aventuras', 'Estrategia', 'Simulación', 'Deportes'],
+        datasets: [
+            {
+                label: 'Dataset 1',
+                data: [1234, 1234, 1234, 1234, 1234],
+                backgroundColor: [
+                    '#bf1111',
+                    '#11bf40',
+                    '#114bbf',
+                    '#bfba11',
+                    '#e88210',
+                ],
+            }
+        ]
+    };
+
+    const myChart = new Chart(ctx, {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Popularidad de géneros de videojuegos'
+                }
+            }
+        }
+    });
+
+
+    const pusher = new Pusher(
+        "3c5db3d3e35c96e8f1ba",
+        {
+            cluster: "eu",
+            forceTLS: true,
+        }
+    );
+
+    const channel = pusher.subscribe("chart-original");
+    channel.bind("new-chart", (datos) => {
+        for (let i = 0; i < datos.length; i++){
+            myChart.data.datasets[0].data[i] += datos[i];
+            myChart.update();
+        }
+    });
+
+    // Hacemos un fetch a trigger.php para activar el trigger de pusher
+    document.getElementById('actualizar').addEventListener('click', () => {
+        fetch('trigger.php')
+            .catch(error => console.error('Error:', error));
+    });
+
+</script>
+</body>
+</html>
